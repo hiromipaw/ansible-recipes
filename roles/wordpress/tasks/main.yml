@@ -1,0 +1,33 @@
+- debug:
+  msg: ensure you have installed lamp (or) lemp stack
+
+- name: downloading WordPress cli aka wp-cli
+  get_url:
+    url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    dest: /usr/local/bin/wp
+    mode: 0755
+
+- name: download latest WordPress locally
+  command: wp core download
+  become_user: "{{ new_user_name }}"
+  args:
+    chdir: /var/www/html/
+
+- name: WordPress site configuration
+  command: "wp core config --dbname={{ WordPress_database_name }} --dbuser={{ WordPress_database_username }} --dbpass={{ WordPress_database_password }}"
+
+- name: information for WordPress site
+  command: "wp core install --url={{ WordPress_site_name }} --title={{ WordPress_site_title }} --admin_user={{ WordPress_admin_username }} --admin_password={{ WordPress_admin_password }} --admin_email={{ WordPress_admin_email }}"
+
+- name: update the file permissions
+  file:
+    path: "{{ WordPress_install_directory }}"
+    recurse: yes
+    owner: "{{ new_user_name }}"
+    group: www-data
+
+- name: updating file and directory permissions
+  shell: "{{ item }}"
+  with_items:
+    - "find {{ WordPress_install_directory }} -type d -exec chmod         755 {} \;"
+    - "find {{ WordPress_install_directory }} -type f -exec chmod         644 {} \;"

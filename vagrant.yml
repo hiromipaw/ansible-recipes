@@ -1,0 +1,6 @@
+---
+- hosts: all
+  roles:
+    - ansible-os-hardening
+    - ansible-role-hidden-service
+    - common
